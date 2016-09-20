@@ -1,8 +1,3 @@
-'''
-Created on Sep 8, 2016
-
-@author: JiaqiLu
-'''
 
 i=int(input('净利润：'))
 arr=[1000000,600000,400000,200000,100000,0]
