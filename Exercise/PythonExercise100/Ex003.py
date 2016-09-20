@@ -1,9 +1,3 @@
-'''
-Created on Sep 8, 2016
-
-@author: JiaqiLu
-'''
-
 import math
 for i in range(10000):
     x=int(math.sqrt(i+100))
