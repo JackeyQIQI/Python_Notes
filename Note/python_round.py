@@ -9,12 +9,12 @@ python十进制下的精确四舍五入：
   所以这个函数解决了这个问题，把2.5四舍五入成3。
 '''
 
-import math
+import numpy as np
 from decimal import Decimal, ROUND_HALF_UP
 
 def round_up(value, dec=0):
-  if math.isnan(value):
-    return math.nan
+  if np.isnan(value):
+    return np.nan
   else:
     multiplier = 10**dec
     value_dec = Decimal(str(value))*multiplier
