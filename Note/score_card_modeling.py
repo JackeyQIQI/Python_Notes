@@ -237,26 +237,28 @@ def cal_psi(df1, df2, var1, var2, cutoffs):
     # cutoffs：切分点列表
     #          建议写法： cutoffs = np.arange(400,800,10)
     #                    cutoffs = np.arange(df_score[score_name].min(), df_score[score_name].max(), 10)
+    # weight：权重字段名，默认值为None
     # mv_list: 字符型缺失值列表，可自定义，默认为空
     # his_pic: 图片保存途径，默认为None不保存
 ### 输出：
     # 评分分布图，可自定义保存图片到本地
     # 评分分布表
     
-def score_histogram(df_score, score_name, cutoffs, mv_list=[], his_pic=None, title_name='Score Histogram'):
+def score_histogram(df_score, score_name, cutoffs, weight=None, mv_list=[], his_pic=None, title_name='Score Histogram'):
     from matplotlib import pyplot as plt
+    if weight==None:
+        df_temp['weight_tmp']=1
+        weight = 'weight_tmp'
+    
     df_temp = df_score.copy()
     df_temp[score_name + '_group'] = df_temp[score_name].apply(lambda x: value2group(x, cutoffs, mv = mv_list))
-    s_score = df_temp[score_name + '_group'].value_counts()
-    s_score = s_score.sort_index(axis=0)
-    df_his_score = pd.DataFrame({score_name:s_score})
-    df_his_score = df_his_score.reset_index()
-    count_sum = df_his_score[score_name].sum()
-    df_his_score['pct'] = df_his_score[score_name]/count_sum
+    df_his_score = df_temp.groupby([score_name+'_group'])[weight].sum().reset_index()
+    count_sum = df_his_score[weight].sum()
+    df_his_score['pct'] = df_his_score[weight]/count_sum
     
     fig = plt.figure()
     plt.title(title_name)
-    plt.bar(np.arange(len(df_his_score)), df_his_score[score_name].tolist(), tick_label=df_his_score['index'].apply(lambda x: int(x)).tolist())
+    plt.bar(np.arange(len(df_his_score)), df_his_score[weight].tolist(), tick_label=df_his_score[score_name+'_group'].apply(lambda x: int(x)).tolist())
     plt.show()
     if his_pic!=None:
         fig.savefig(his_pic, dpi=fig.dpi)
