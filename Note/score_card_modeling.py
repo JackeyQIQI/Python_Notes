@@ -18,7 +18,7 @@ Created on Tue Dec 11 17:38:38 2018
 ### function list:
     # 日期转换函数(已删除)
         以后用 df_all[base_date+"_date"] = df_all[base_date].apply(lambda x: pd.to_datetime(str(int(x))) if type(x)!=str and np.isnan(x)==False else pd.to_datetime(x)) 处理日期解析
-	# 分组转换
+    # 分组转换
         value2group(x, cutoffs, mv = [])
     # 计算KS值，生成 KS曲线 ROC曲线 lift曲线
         cal_ks(df, score_name, label_name, label_1='bad', KS_pic=None, ROC_pic=None, LIFT_pic=None)
@@ -26,7 +26,7 @@ Created on Tue Dec 11 17:38:38 2018
         cal_psi(df1, df2, var1, var2, cutoffs)
     # 评分分布图
         score_histogram(df_score, score_name, cutoffs, mv_list=[], his_pic=None, title_name='Score Histogram')
-	# 评分查得率
+    # 评分查得率
         score_count(df_score, score_name, nan_name)
     # 缺失率分析
         ana_miss(df, var_list, mv_str=['','unknow','Unknow','unknown','Unknown','Null','NONE','none','None','NAN'])
@@ -58,7 +58,7 @@ Created on Tue Dec 11 17:38:38 2018
     # decrypt2df(self, infile, encoding='utf-8')
 """
 
-#依赖包，未写进函数，使用函数时需要提前调用：
+#依赖包，未写进函数，使用函数时需要提前调用，需保证已安装对应包：
 import pandas as pd
 import numpy as np
 from datetime import datetime
