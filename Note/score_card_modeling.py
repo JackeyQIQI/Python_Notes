@@ -197,34 +197,35 @@ def cal_ks(df, score_name, label_name, label_1 = 'bad', KS_pic=None, ROC_pic=Non
 # df2: 表2
 # var2: 表2中的变量2
 # cutoffs: 列表，切分点
+# weight: 权重，默认为1
 
 # 返回： PSI计算表，PSI值
         
-def cal_psi(df1, df2, var1, var2, cutoffs):
-    df1['v1_group'] = df1[var1].apply(lambda x: value2group(x, cutoffs, mv = []))
-    s_1 = df1['v1_group'].value_counts()
-    s_1 = s_1.sort_index(axis=0)
-    df_his_1 = pd.DataFrame({'计数1':s_1})
-    df_his_1 = df_his_1.reset_index()
-    total_count_1 = df_his_1['计数1'].sum(axis=0)
-    df_his_1['占比1'] = df_his_1['计数1'].apply(lambda x: round((x/total_count_1),6))
+def cal_psi(df1, df2, var1, var2, cutoffs, weight==None):
+    if weight==None:
+        df1['weight_tmp']=1
+        df2['weight_tmp']=1
+        weight = 'weight_tmp'
     
-    df2['v2_group'] = df2[var2].apply(lambda x: value2group(x, cutoffs, mv = []))
-    s_2 = df2['v2_group'].value_counts()
-    s_2 = s_2.sort_index(axis=0)
-    df_his_2 = pd.DataFrame({'计数2':s_2})
-    df_his_2 = df_his_2.reset_index()
-    total_count_2 = df_his_2['计数2'].sum(axis=0)
-    df_his_2['占比2'] = df_his_2['计数2'].apply(lambda x: round((x/total_count_2),6))
-    
-    df_his = pd.merge(df_his_1, df_his_2, on = 'index', how = 'outer')
-    df_his = df_his.rename(columns={'index':'取值区间'})
-    df_his['PSI'] = (df_his['占比1'] - df_his['占比2'])*(np.log(df_his['占比1']/df_his['占比2']))
+    df1['group'] = df1[var1].apply(lambda x: value2group(x, cutoffs, mv = []))
+    df_his_1 = df1.groupby(['group'])[weight].sum().reset_index()
+    total_count_1 = df_his_1[weight].sum(axis=0)
+    df_his_1 = df_his_1.rename(columns={weight:'count_1'})
+    df_his_1['pct_1'] = df_his_1['count_1'].apply(lambda x: round((x/total_count_1),6))
+
+    df2['group'] = df2[var2].apply(lambda x: value2group(x, cutoffs, mv = []))
+    df_his_2 = df2.groupby(['group'])[weight].sum().reset_index()
+    total_count_2 = df_his_2[weight].sum(axis=0)
+    df_his_2 = df_his_2.rename(columns={weight:'count_2'})
+    df_his_2['pct_2'] = df_his_2['count_2'].apply(lambda x: round((x/total_count_2),6))
+
+    df_his = pd.merge(df_his_1, df_his_2, on = 'group', how = 'outer')
+    df_his['PSI'] = (df_his['pct_1'] - df_his['pct_2'])*(np.log(df_his['pct_1']/df_his['pct_2']))
     v_psi = round(df_his['PSI'].sum(axis=0), 4)
-    
-    df_temp = pd.DataFrame({'占比2':'SUM', 'PSI':v_psi},index=[0])
+
+    df_temp = pd.DataFrame({'pct_2':'SUM', 'PSI':v_psi},index=[0])
     df_his = pd.concat([df_his,df_temp])
-    df_his = df_his[['取值区间', '计数1', '计数2', '占比1', '占比2', 'PSI']]
+    df_his = df_his[['group', 'count_1', 'count_2', 'pct_1', 'pct_2', 'PSI']]
     return df_his, v_psi
 #################################################################################################
 
