@@ -325,27 +325,26 @@ def missing_ana(df, var_list, mv_str='unknown'):
 ### 输入：
     # df: 读入的数据表
     # var_list: 要分析的变量名列表
+    # weight:权重 默认为None
 ### 输出:
     # 频数分布表
-def ana_freq(df, var_list):
-    varname = []
-    varvalue = []
-    varcount = []
-    varpct = []
-    total = len(df)
-    df_freq = df.fillna('NaN')
-    df_freq = df_freq.applymap(lambda x: str(x))
+def ana_freq(df, var_list, weight=None):
+    df_freq = df.copy()
+    
+    if weight==None:
+        df_freq['weight_tmp']=1
+        weight = 'weight_tmp'
+    total = df_freq[weight].sum()
+    df_freq = df_freq.fillna('NaN')
+    df_out = pd.DataFrame({'Varname':[], 'Value':[], 'Count':[], 'Percent':[]})
     
     for i in range(len(var_list)):
-        freq_list=df_freq[var_list[i]].value_counts(dropna = False)
-        for j in range(len(freq_list)):
-            varname.append(var_list[i])
-            varvalue.append(freq_list.index[j])
-            varcount.append(freq_list[freq_list.index[j]])
-            varpct.append(round(100*freq_list[freq_list.index[j]]/total,2))
-    
-    df_out = pd.DataFrame({'1标签':varname,'2取值':varvalue,'3计数':varcount,'4占比':varpct})
-    df_out = df_out.sort_values(by = ['1标签','2取值'], ascending = True)
+        df_his = df_freq.groupby([var_list[i]])[weight].sum().reset_index()
+        df_his['Varname'] = var_list[i]
+        df_his['Percent'] = df_his[weight]/total
+        df_his = df_his.rename(columns={var_list[i]:'Value'})
+        df_his = df_his.rename(columns={weight:'Count'})
+        df_out = pd.concat([df_out, df_his])
     
     print('frequency analysis complete!')
     print('Time: ' + str(datetime.now() - startTime))
