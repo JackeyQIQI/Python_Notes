@@ -20,6 +20,7 @@ Created on Tue Dec 11 17:38:38 2018
         以后用 df_all[base_date+"_date"] = df_all[base_date].apply(lambda x: pd.to_datetime(str(int(x))) if type(x)!=str and np.isnan(x)==False else pd.to_datetime(x)) 处理日期解析
     # 分组转换
         value2group(x, cutoffs, mv = [])
+	value2group_outstr(x, cutoffs, mv = [])
     # 计算KS值，生成 KS曲线 ROC曲线 lift曲线
         cal_ks(df, score_name, label_name, label_1='bad', KS_pic=None, ROC_pic=None, LIFT_pic=None)
     # 计算PSI
@@ -77,6 +78,10 @@ startTime = datetime.now()
 # x: 分组的变量
 # cutoffs: 切分点列表
 # mv: 字符型缺失值列表，可自定义，默认为空
+
+### value2group 输出的分组值为数值，取区间左闭部分
+### value2group_outstr 输出的分组值为字符，显示完整的左闭右开区间
+
 def value2group(x, cutoffs, mv = []):
     cutoffs = sorted(cutoffs)
     num_groups = len(cutoffs)
@@ -95,6 +100,25 @@ def value2group(x, cutoffs, mv = []):
             if cutoffs[i-1] <= x < cutoffs[i]:
                 return cutoffs[i-1]
         return cutoffs[num_groups-1]
+
+def value2group_outstr(x, cutoffs, mv = []):
+    cutoffs = sorted(cutoffs)
+    num_groups = len(cutoffs)
+    if num_groups == 1:
+        return cutoffs[0]
+    elif x == '' or x in mv:
+        return 'None'
+    elif type(x) == str:
+        return x
+    elif np.isnan(x):
+        return -9999
+    elif x < cutoffs[0]:
+        return '(-,'+str(cutoffs[0])+')'
+    else:
+        for i in range(1, num_groups):
+            if cutoffs[i-1] <= x < cutoffs[i]:
+                return '[' + str(cutoffs[i-1]) + ',' + str(cutoffs[i]) + ')'
+        return '['+str(cutoffs[num_groups-1])+',+)'
 ################################################################################
 
 
@@ -207,13 +231,13 @@ def cal_psi(df1, df2, var1, var2, cutoffs, weight==None):
         df2['weight_tmp']=1
         weight = 'weight_tmp'
     
-    df1['group'] = df1[var1].apply(lambda x: value2group(x, cutoffs, mv = []))
+    df1['group'] = df1[var1].apply(lambda x: value2group_outstr(x, cutoffs, mv = []))
     df_his_1 = df1.groupby(['group'])[weight].sum().reset_index()
     total_count_1 = df_his_1[weight].sum(axis=0)
     df_his_1 = df_his_1.rename(columns={weight:'count_1'})
     df_his_1['pct_1'] = df_his_1['count_1'].apply(lambda x: round((x/total_count_1),6))
 
-    df2['group'] = df2[var2].apply(lambda x: value2group(x, cutoffs, mv = []))
+    df2['group'] = df2[var2].apply(lambda x: value2group_outstr(x, cutoffs, mv = []))
     df_his_2 = df2.groupby(['group'])[weight].sum().reset_index()
     total_count_2 = df_his_2[weight].sum(axis=0)
     df_his_2 = df_his_2.rename(columns={weight:'count_2'})
@@ -252,14 +276,14 @@ def score_histogram(df_score, score_name, cutoffs, weight=None, mv_list=[], his_
         weight = 'weight_tmp'
     
     df_temp = df_score.copy()
-    df_temp[score_name + '_group'] = df_temp[score_name].apply(lambda x: value2group(x, cutoffs, mv = mv_list))
+    df_temp[score_name + '_group'] = df_temp[score_name].apply(lambda x: value2group_outstr(x, cutoffs, mv = mv_list))
     df_his_score = df_temp.groupby([score_name+'_group'])[weight].sum().reset_index()
     count_sum = df_his_score[weight].sum()
     df_his_score['pct'] = df_his_score[weight]/count_sum
     
     fig = plt.figure()
     plt.title(title_name)
-    plt.bar(np.arange(len(df_his_score)), df_his_score[weight].tolist(), tick_label=df_his_score[score_name+'_group'].apply(lambda x: int(x)).tolist())
+    plt.bar(np.arange(len(df_his_score)), df_his_score[weight].tolist(), tick_label=df_his_score[score_name+'_group'].apply(lambda x: str(x)).tolist())
     plt.show()
     if his_pic!=None:
         fig.savefig(his_pic, dpi=fig.dpi)
@@ -770,7 +794,7 @@ def finebin_single_var(df, cutoffs, var, label, label_1 = 'bad', weight = None, 
     freq_list = freq_table.sum(axis=1)
 
     group_var = var+'_group'
-    df[group_var] = df[var].apply(lambda x: value2group(x, cutoffs, mv = mv_list))
+    df[group_var] = df[var].apply(lambda x: value2group_outstr(x, cutoffs, mv = mv_list))
     freq_table = pd.pivot_table(df,index=[group_var],columns=[label],values=[weight],aggfunc=[np.sum],fill_value=0)
     freq_list = freq_table.sum(axis=1)
     freq_true_list  = freq_table.iloc[:,1]
