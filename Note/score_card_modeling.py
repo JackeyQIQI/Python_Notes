@@ -63,7 +63,6 @@ Created on Tue Dec 11 17:38:38 2018
 import pandas as pd
 import numpy as np
 from datetime import datetime
-startTime = datetime.now()
 
 ## 个别函数用到的包，已写进函数，不用另外调用，需保证已安装对应包：
 ## scipy
@@ -323,6 +322,7 @@ def score_count(df_score, score_name, nan_name):
     # 缺失率表
 
 def missing_ana(df, var_list, mv_str='unknown'):
+    startTime = datetime.now()
     s_null_pct = round((df.isnull().sum()/len(df))*100,2)
     s_count = df.count()
 
@@ -354,6 +354,7 @@ def missing_ana(df, var_list, mv_str='unknown'):
 ### 输出:
     # 频数分布表
 def ana_freq(df, var_list, weight=None, fill_missing='-999999'):
+    startTime = datetime.now()
     df_freq = df.copy()
     
     if weight==None:
@@ -386,6 +387,7 @@ def ana_freq(df, var_list, weight=None, fill_missing='-999999'):
     # 数值分布表
     
 def ana_num(df, var_list):
+    startTime = datetime.now()
     df_num       = df[var_list]
     df_num.index = range(len(df_num))
     df_num.columns = var_list
@@ -479,6 +481,7 @@ def chiMerge(df, col, target, max_groups=20, p_value=0.05):
     # autobin woe报告，保存到本地outfile
 
 def autobin_all_report(df, var_list, label_list, outfile, label_1 = 'bad', max_groups=20, p_value=0.05, mv_list=[], speed_lv=100):
+    startTime = datetime.now()
     writer = pd.ExcelWriter(outfile)
     
     for label in label_list:
@@ -634,6 +637,7 @@ def autobin_all_report(df, var_list, label_list, outfile, label_1 = 'bad', max_g
     # finebin woe报告，保存到本地outfile
     
 def finebin_all_report(df, df_cutoffs, var_list, label_list, outfile, label_1='bad', mv_list=[]):
+    startTime = datetime.now()
     writer = pd.ExcelWriter(outfile)
     
     for label in label_list:
