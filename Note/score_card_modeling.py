@@ -31,7 +31,7 @@ Created on Tue Dec 11 17:38:38 2018
     # 缺失率分析
         ana_miss(df, var_list, mv_str=['','unknow','Unknow','unknown','Unknown','Null','NONE','none','None','NAN'])
     # 频数分析
-        ana_freq(df, var_list)
+        ana_freq(df, var_list, weight=None, fill_missing='-999999')
     # 数值分析
         ana_num(df, var_list)
     # 全部变量autobin报告
@@ -326,16 +326,17 @@ def missing_ana(df, var_list, mv_str='unknown'):
     # df: 读入的数据表
     # var_list: 要分析的变量名列表
     # weight:权重 默认为None
+    # fill_missing: 填充缺失值的特殊值，默认为'-999999'
 ### 输出:
     # 频数分布表
-def ana_freq(df, var_list, weight=None):
+def ana_freq(df, var_list, weight=None, fill_missing='-999999'):
     df_freq = df.copy()
     
     if weight==None:
         df_freq['weight_tmp']=1
         weight = 'weight_tmp'
     total = df_freq[weight].sum()
-    df_freq = df_freq.fillna('NaN')
+    df_freq = df_freq.fillna(fill_missing)
     df_out = pd.DataFrame({'Varname':[], 'Value':[], 'Count':[], 'Percent':[]})
     
     for i in range(len(var_list)):
