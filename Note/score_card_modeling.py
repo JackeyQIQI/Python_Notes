@@ -111,7 +111,7 @@ def value2group_outstr(x, cutoffs, mv = []):
     elif type(x) == str:
         return x
     elif np.isnan(x):
-        return -9999
+        return 'missing'
     elif x < cutoffs[0]:
         return '(-,'+str(cutoffs[0])+')'
     else:
