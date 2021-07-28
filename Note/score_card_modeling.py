@@ -270,11 +270,11 @@ def cal_psi(df1, df2, var1, var2, cutoffs, weight==None):
     
 def score_histogram(df_score, score_name, cutoffs, weight=None, mv_list=[], his_pic=None, title_name='Score Histogram'):
     from matplotlib import pyplot as plt
+    df_temp = df_score.copy()
     if weight==None:
         df_temp['weight_tmp']=1
         weight = 'weight_tmp'
     
-    df_temp = df_score.copy()
     df_temp[score_name + '_group'] = df_temp[score_name].apply(lambda x: value2group_outstr(x, cutoffs, mv = mv_list))
     df_his_score = df_temp.groupby([score_name+'_group'])[weight].sum().reset_index()
     count_sum = df_his_score[weight].sum()
