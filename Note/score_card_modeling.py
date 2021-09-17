@@ -772,8 +772,8 @@ def finebin_single_var(df, cutoffs, var, label, label_1 = 'bad', weight = None, 
         df['bad'] = df[label].apply(lambda e: 1-e)
         label = 'bad'
     if weight == None:
-        df['weight']=1
-        weight = 'weight'
+        df['weight00']=1
+        weight = 'weight00'
 
     len_true = df[df[label] == 1][weight].sum()
     len_false = df[df[label] == 0][weight].sum()
