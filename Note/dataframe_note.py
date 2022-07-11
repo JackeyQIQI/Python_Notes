@@ -6,3 +6,9 @@ del df["bb"]
 var_list = list(df_sample)
 var_list.remove('ID')
 var_list.remove('Month')
+
+#rename column in dataframe
+df = df.rename(columns={'oldname':'newname'})
+
+
+
